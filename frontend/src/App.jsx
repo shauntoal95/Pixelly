@@ -38,14 +38,25 @@ const [bookingMessage, setBookingMessage] = useState("");
     const role = localStorage.getItem("pixelly_role");
     if (role === "business_owner") {
       setPage("owner");
-      setOwnerData({
-        fullName: localStorage.getItem("pixelly_full_name") || "Studio Owner",
-        notifications: [
-          { id: 1, client: "Harper Estates", category: "Residential", requested: "18 Mar 09:00" },
-          { id: 2, client: "Ella Morgan", category: "Wedding / Proposal", requested: "20 Mar 12:00" }
-        ],
-        trialDaysRemaining: 14
-      });
+      fetch(`${API_URL}/api/bookings`)
+  .then(res => res.json())
+  .then(data => {
+
+    const formatted = data.map(b => ({
+      id: b.id,
+      client: b.name,
+      category: b.shootType,
+      requested: b.date
+    }));
+
+    setOwnerData({
+      fullName: localStorage.getItem("pixelly_full_name") || "Studio Owner",
+      notifications: formatted,
+      trialDaysRemaining: 14
+    });
+
+  });
+
     }
   }, []);
 
