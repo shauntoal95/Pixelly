@@ -521,9 +521,9 @@ if (page === "studio" && selectedStudio) {
   }
 
 }}
-
-    Send booking request
-  </button>
+>
+  Send booking request
+</button>
 
   {bookingMessage && (
     <div style={{ marginTop: 15 }}>{bookingMessage}</div>
