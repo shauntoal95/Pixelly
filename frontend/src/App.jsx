@@ -376,8 +376,8 @@ function TopNav({ onGoHome, onSignup, onLogin, showAuth = true }) {
 
       {showAuth && (
         <div style={authTopBox}>
-          <button onClick={onSignup} style={primaryDarkButton}>Business / Studio signup</button>
-          <button onClick={onLogin} style={lightButton}>Business / Studio login</button>
+          <button onClick={onSignup} style={primaryDarkButton}>Business signup</button>
+          <button onClick={onLogin} style={lightButton}>Business login</button>
         </div>
       )}
     </header>
