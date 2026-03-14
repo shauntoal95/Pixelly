@@ -45,6 +45,7 @@ app.post("/api/bookings", (req, res) => {
 
   const booking = {
     id: Date.now(),
+    status: "pending",
     ...req.body
   };
 
@@ -63,6 +64,23 @@ GET ALL BOOKINGS
 */
 app.get("/api/bookings", (_req, res) => {
   res.json(bookings);
+});
+
+app.patch("/api/bookings/:id", (req, res) => {
+
+  const id = Number(req.params.id);
+  const { status } = req.body;
+
+  const booking = bookings.find(b => b.id === id);
+
+  if (!booking) {
+    return res.status(404).json({ error: "Booking not found" });
+  }
+
+  booking.status = status;
+
+  res.json({ success: true, booking });
+
 });
 
 /*
