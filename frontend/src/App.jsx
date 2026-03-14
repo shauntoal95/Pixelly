@@ -1,308 +1,216 @@
-import React from 'react';
-import { Link, Navigate, Route, Routes } from 'react-router-dom';
+import { useState } from "react";
 
-const navItems = [
-  { label: 'Find a provider', href: '#marketplace' },
-  { label: 'Studio login', href: '/login' },
-];
-
-function Shell({ children }) {
-  return (
-    <div className="app-shell">
-      <header className="topbar">
-        <Link to="/" className="brand">
-          <div className="brand-mark">P</div>
-          <div>
-            <div className="brand-name">Pixelly</div>
-            <div className="brand-subtitle">Marketplace + studio operations</div>
-          </div>
-        </Link>
-        <nav className="nav-links">
-          {navItems.map((item) =>
-            item.href.startsWith('/') ? (
-              <Link key={item.label} className="button button-ghost" to={item.href}>
-                {item.label}
-              </Link>
-            ) : (
-              <a key={item.label} className="button button-ghost" href={item.href}>
-                {item.label}
-              </a>
-            )
-          )}
-        </nav>
-      </header>
-      {children}
-    </div>
-  );
-}
-
-function HomePage() {
-  return (
-    <Shell>
-      <main className="page">
-        <section className="hero">
-          <div className="hero-copy">
-            <div className="eyebrow">BOOK LOCAL MEDIA PROFESSIONALS</div>
-            <h1>Find trusted photographers, videographers and property media teams near you.</h1>
-            <p>
-              Search by postcode, browse profiles, check availability and send booking requests.
-              Studios can manage clients, jobs, team schedules and subscriptions from one place.
-            </p>
-            <div className="hero-actions">
-              <a className="button button-primary" href="#marketplace">Find a media provider</a>
-              <Link className="button button-secondary" to="/login">Studio login</Link>
-            </div>
-          </div>
-          <div className="hero-panel">
-            <h3>Built around your workflow</h3>
-            <ul>
-              <li>Map view or list view from a simple postcode search</li>
-              <li>Business owners accept or suggest alternative times</li>
-              <li>Team calendars include jobs, editing, travel, holiday and sickness</li>
-              <li>Additional team members are billed at £10 each per month</li>
-            </ul>
-          </div>
-        </section>
-
-        <section id="marketplace" className="card-block">
-          <div className="section-intro">
-            <div className="eyebrow">CUSTOMER MARKETPLACE</div>
-            <h2>Search by postcode, then filter only if you want to.</h2>
-            <p>Pixelly is built as studio software first, with a customer booking marketplace layered on top.</p>
-          </div>
-          <div className="search-grid">
-            <input className="input" placeholder="Enter postcode or location" />
-            <select className="input">
-              <option>All services</option>
-              <option>Residential</option>
-              <option>Wedding / Proposal</option>
-              <option>Commercial</option>
-              <option>Event</option>
-              <option>Hospitality</option>
-              <option>Social Media</option>
-              <option>Landscape</option>
-              <option>Product</option>
-            </select>
-            <div className="toggle-group">
-              <button className="button button-primary small">List view</button>
-              <button className="button button-secondary small">Map view</button>
-            </div>
-          </div>
-          <div className="placeholder-panel">Provider results will go here in the marketplace build.</div>
-        </section>
-
-        <section className="grid-two">
-          <div className="card-block">
-            <div className="eyebrow">BUSINESS OWNER VIEW</div>
-            <h2>New bookings first. Calendar next.</h2>
-            <p>
-              Business owners should first see notifications and incoming bookings, then review team availability in a proper calendar.
-            </p>
-            <div className="mini-list">
-              <div className="mini-item"><strong>Pending booking</strong><span>Harper Estates · Residential · 18 Mar 09:00</span></div>
-              <div className="mini-item"><strong>Pending booking</strong><span>Ella Morgan · Wedding / Proposal · 20 Mar 12:00</span></div>
-              <div className="mini-item"><strong>Action</strong><span>Accept, decline, or suggest another time</span></div>
-            </div>
-            <Link to="/owner" className="button button-primary">Open owner dashboard shell</Link>
-          </div>
-          <div className="card-block">
-            <div className="eyebrow">TEAM MEMBER VIEW</div>
-            <h2>Today’s jobs and personal calendar only.</h2>
-            <p>
-              Team members do not need business admin. They need their schedule, job details, and quick status buttons.
-            </p>
-            <div className="mini-list">
-              <div className="mini-item"><strong>09:00</strong><span>Riverside apartment shoot</span></div>
-              <div className="mini-item"><strong>13:00</strong><span>Hotel social content package</span></div>
-              <div className="mini-item"><strong>Status</strong><span>On my way / Completed</span></div>
-            </div>
-            <Link to="/team" className="button button-secondary">Open team dashboard shell</Link>
-          </div>
-        </section>
-      </main>
-    </Shell>
-  );
-}
-
-function LoginPage() {
-  return (
-    <Shell>
-      <main className="page narrow-page">
-        <section className="card-block login-card">
-          <div className="eyebrow">STUDIO LOGIN</div>
-          <h1>Welcome to Pixelly</h1>
-          <p>This is the fresh starting point for Build 1: roles, signup, login and trial handling.</p>
-          <div className="form-grid">
-            <input className="input" placeholder="Email address" />
-            <input className="input" placeholder="Password" type="password" />
-            <button className="button button-primary">Login</button>
-            <button className="button button-secondary">Create business account</button>
-          </div>
-        </section>
-      </main>
-    </Shell>
-  );
-}
-
-function CalendarLegend() {
-  const items = [
-    ['Job', 'swatch-job'],
-    ['Travel', 'swatch-travel'],
-    ['Editing', 'swatch-editing'],
-    ['Holiday', 'swatch-holiday'],
-    ['Sickness', 'swatch-sickness'],
-    ['Available', 'swatch-available'],
-  ];
-  return (
-    <div className="legend">
-      {items.map(([label, className]) => (
-        <div key={label} className="legend-item"><span className={`swatch ${className}`}></span>{label}</div>
-      ))}
-    </div>
-  );
-}
-
-function CalendarGrid({ title }) {
-  const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-  const cells = Array.from({ length: 35 }, (_, i) => i + 1);
-  return (
-    <div className="calendar-card">
-      <div className="calendar-header">
-        <div>
-          <div className="eyebrow">CALENDAR</div>
-          <h2>{title}</h2>
-        </div>
-        <div className="toolbar">
-          <button className="button button-secondary small">Month</button>
-          <button className="button button-ghost small">Week</button>
-          <button className="button button-ghost small">Day</button>
-        </div>
-      </div>
-      <CalendarLegend />
-      <div className="calendar-grid">
-        {days.map((day) => <div key={day} className="calendar-dayname">{day}</div>)}
-        {cells.map((day) => (
-          <div key={day} className="calendar-cell">
-            <div className="cell-date">{day}</div>
-            {day === 4 && <div className="event-pill job">Amy · Riverside shoot</div>}
-            {day === 5 && <div className="event-pill available">Jay · Available</div>}
-            {day === 9 && <div className="event-pill sickness">Leah · Sickness</div>}
-            {day === 12 && <div className="event-pill holiday">Amy · Holiday</div>}
-            {day === 18 && <div className="event-pill editing">Jay · Editing</div>}
-            {day === 19 && <div className="event-pill travel">Owner · Travel</div>}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function OwnerDashboard() {
-  return (
-    <Shell>
-      <main className="page owner-layout">
-        <section className="owner-overview card-block">
-          <div className="calendar-header">
-            <div>
-              <div className="eyebrow">BUSINESS OWNER DASHBOARD</div>
-              <h1>Notifications first. Team availability next.</h1>
-            </div>
-            <div className="toolbar">
-              <button className="button button-primary small">New booking</button>
-              <button className="button button-secondary small">Invite team member</button>
-            </div>
-          </div>
-          <div className="notification-grid">
-            <div className="notice-card">
-              <strong>New booking request</strong>
-              <span>Harper Estates · Residential · 18 Mar 09:00</span>
-              <div className="button-row">
-                <button className="button button-primary small">View calendar</button>
-                <button className="button button-secondary small">Suggest time</button>
-              </div>
-            </div>
-            <div className="notice-card">
-              <strong>New booking request</strong>
-              <span>Ella Morgan · Wedding / Proposal · 20 Mar 12:00</span>
-              <div className="button-row">
-                <button className="button button-primary small">Accept</button>
-                <button className="button button-ghost small">Decline</button>
-              </div>
-            </div>
-            <div className="notice-card">
-              <strong>Trial status</strong>
-              <span>14 day free trial running · 10 days remaining</span>
-              <button className="button button-secondary small">View billing</button>
-            </div>
-          </div>
-        </section>
-        <section className="sidebar card-block">
-          <div className="eyebrow">TEAM</div>
-          <h2>View by person</h2>
-          <div className="mini-list">
-            <div className="mini-item active-item"><strong>All team</strong><span>Month overview</span></div>
-            <div className="mini-item"><strong>Shaun Owner</strong><span>Business owner calendar</span></div>
-            <div className="mini-item"><strong>Amy Reed</strong><span>Photographer</span></div>
-            <div className="mini-item"><strong>Jay Patel</strong><span>Videographer</span></div>
-            <div className="mini-item"><strong>Leah Moss</strong><span>Editor</span></div>
-          </div>
-          <div className="eyebrow spacing-top">BLOCK TIME</div>
-          <div className="form-grid">
-            <select className="input"><option>Amy Reed</option></select>
-            <select className="input"><option>Holiday</option><option>Sickness</option><option>Unavailable</option></select>
-            <input className="input" type="date" />
-            <input className="input" type="date" />
-            <button className="button button-primary">Save range</button>
-          </div>
-        </section>
-        <section className="main-calendar">
-          <CalendarGrid title="All team month view" />
-        </section>
-      </main>
-    </Shell>
-  );
-}
-
-function TeamDashboard() {
-  return (
-    <Shell>
-      <main className="page narrow-page">
-        <section className="card-block">
-          <div className="calendar-header">
-            <div>
-              <div className="eyebrow">TEAM MEMBER DASHBOARD</div>
-              <h1>Today’s jobs and my calendar.</h1>
-            </div>
-            <div className="toolbar">
-              <button className="button button-primary small">On my way</button>
-              <button className="button button-secondary small">Completed</button>
-            </div>
-          </div>
-          <div className="notification-grid team-grid">
-            <div className="notice-card">
-              <strong>09:00 · Riverside apartment marketing pack</strong>
-              <span>Photography, video, floorplan</span>
-            </div>
-            <div className="notice-card">
-              <strong>13:00 · Hotel launch social package</strong>
-              <span>Photography, social clips</span>
-            </div>
-          </div>
-        </section>
-        <CalendarGrid title="My month calendar" />
-      </main>
-    </Shell>
-  );
-}
+const API_URL = import.meta.env.VITE_API_URL;
 
 export default function App() {
+  const [mode, setMode] = useState("signup");
+  const [form, setForm] = useState({
+    businessName: "",
+    ownerName: "",
+    email: "",
+    password: ""
+  });
+  const [login, setLogin] = useState({
+    email: "",
+    password: ""
+  });
+  const [message, setMessage] = useState("");
+
+  const onChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const onLoginChange = (e) => {
+    setLogin({ ...login, [e.target.name]: e.target.value });
+  };
+
+  const handleSignup = async (e) => {
+    e.preventDefault();
+    setMessage("Creating your Pixelly account...");
+
+    try {
+      const res = await fetch(`${API_URL}/api/auth/signup/business`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(form)
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setMessage(data.error || "Signup failed");
+        return;
+      }
+
+      setMessage(`Success. Your 14-day trial is active until ${new Date(data.trialEnds).toLocaleDateString()}.`);
+    } catch (error) {
+      setMessage("Something went wrong. Please try again.");
+    }
+  };
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setMessage("Logging you in...");
+
+    try {
+      const res = await fetch(`${API_URL}/api/auth/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(login)
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setMessage(data.error || "Login failed");
+        return;
+      }
+
+      localStorage.setItem("pixelly_token", data.token);
+      localStorage.setItem("pixelly_role", data.role);
+
+      if (data.role === "business_owner") {
+        setMessage("Login successful. Owner dashboard is next.");
+      } else if (data.role === "team_member") {
+        setMessage("Login successful. Team dashboard is next.");
+      } else if (data.role === "platform_owner") {
+        setMessage("Login successful. Admin dashboard is next.");
+      } else {
+        setMessage("Login successful.");
+      }
+    } catch (error) {
+      setMessage("Something went wrong. Please try again.");
+    }
+  };
+
   return (
-    <Routes>
-      <Route path="/" element={<HomePage />} />
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/owner" element={<OwnerDashboard />} />
-      <Route path="/team" element={<TeamDashboard />} />
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+    <div style={{ minHeight: "100vh", background: "#f5f2ec", color: "#14213d", fontFamily: "Inter, Arial, sans-serif" }}>
+      <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "24px 32px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <div style={{
+            width: 44,
+            height: 44,
+            borderRadius: 12,
+            background: "#14213d",
+            color: "white",
+            display: "grid",
+            placeItems: "center",
+            fontWeight: 700
+          }}>
+            P
+          </div>
+          <div>
+            <div style={{ fontSize: 32, fontWeight: 700 }}>Pixelly</div>
+            <div style={{ color: "#5f6b7a" }}>Marketplace + studio operations</div>
+          </div>
+        </div>
+        <div style={{ display: "flex", gap: 12 }}>
+          <button onClick={() => setMode("signup")} style={tabStyle(mode === "signup")}>Business signup</button>
+          <button onClick={() => setMode("login")} style={tabStyle(mode === "login")}>Studio login</button>
+        </div>
+      </header>
+
+      <main style={{ maxWidth: 1100, margin: "0 auto", padding: "24px 32px 60px" }}>
+        <section style={{
+          background: "#24324b",
+          color: "white",
+          borderRadius: 28,
+          padding: 36,
+          display: "grid",
+          gridTemplateColumns: "1.3fr 1fr",
+          gap: 28
+        }}>
+          <div>
+            <div style={{ letterSpacing: 2, fontSize: 12, marginBottom: 18, opacity: 0.85 }}>
+              RUN YOUR MEDIA BUSINESS IN ONE PLACE
+            </div>
+            <h1 style={{ fontSize: 64, lineHeight: 1.02, margin: "0 0 18px", fontWeight: 800 }}>
+              Sign up to Pixelly and start your 14-day free trial.
+            </h1>
+            <p style={{ fontSize: 20, lineHeight: 1.5, opacity: 0.92 }}>
+              Manage bookings, team calendars, jobs, blocked time, and studio operations from one platform.
+            </p>
+          </div>
+
+          <div style={{
+            background: "rgba(255,255,255,0.08)",
+            borderRadius: 24,
+            padding: 24
+          }}>
+            {mode === "signup" ? (
+              <form onSubmit={handleSignup} style={{ display: "grid", gap: 14 }}>
+                <h2 style={{ margin: 0 }}>Create your business account</h2>
+                <input name="businessName" placeholder="Business name" value={form.businessName} onChange={onChange} style={inputStyle} />
+                <input name="ownerName" placeholder="Owner name" value={form.ownerName} onChange={onChange} style={inputStyle} />
+                <input name="email" type="email" placeholder="Email address" value={form.email} onChange={onChange} style={inputStyle} />
+                <input name="password" type="password" placeholder="Password" value={form.password} onChange={onChange} style={inputStyle} />
+                <button type="submit" style={primaryButton}>Start free trial</button>
+                <p style={{ margin: 0, fontSize: 14, opacity: 0.85 }}>
+                  £49/month for the owner account after trial. Add team members later for £10/month each.
+                </p>
+              </form>
+            ) : (
+              <form onSubmit={handleLogin} style={{ display: "grid", gap: 14 }}>
+                <h2 style={{ margin: 0 }}>Studio login</h2>
+                <input name="email" type="email" placeholder="Email address" value={login.email} onChange={onLoginChange} style={inputStyle} />
+                <input name="password" type="password" placeholder="Password" value={login.password} onChange={onLoginChange} style={inputStyle} />
+                <button type="submit" style={primaryButton}>Log in</button>
+                <p style={{ margin: 0, fontSize: 14, opacity: 0.85 }}>
+                  Business owners, team members and platform admin will be routed to the correct dashboard next.
+                </p>
+              </form>
+            )}
+          </div>
+        </section>
+
+        {message && (
+          <div style={{
+            marginTop: 24,
+            background: "white",
+            border: "1px solid #d9d4ca",
+            borderRadius: 18,
+            padding: 18,
+            fontSize: 16
+          }}>
+            {message}
+          </div>
+        )}
+      </main>
+    </div>
   );
 }
+
+function tabStyle(active) {
+  return {
+    background: active ? "#14213d" : "white",
+    color: active ? "white" : "#14213d",
+    border: "1px solid #d9d4ca",
+    padding: "12px 18px",
+    borderRadius: 16,
+    cursor: "pointer",
+    fontWeight: 600
+  };
+}
+
+const inputStyle = {
+  width: "100%",
+  padding: "14px 16px",
+  borderRadius: 14,
+  border: "1px solid #d9d4ca",
+  fontSize: 16
+};
+
+const primaryButton = {
+  background: "#14213d",
+  color: "white",
+  border: "none",
+  padding: "14px 18px",
+  borderRadius: 16,
+  fontSize: 16,
+  fontWeight: 700,
+  cursor: "pointer"
+};
