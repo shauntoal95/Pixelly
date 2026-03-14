@@ -6,10 +6,14 @@ export default function App() {
   const [page, setPage] = useState("home");
   const [selectedStudio, setSelectedStudio] = useState(null);
   const [bookingForm, setBookingForm] = useState({
+  name: "",
+  email: "",
+  phone: "",
   shootType: "Residential",
   date: "",
   notes: ""
 });
+
 
 const [bookingMessage, setBookingMessage] = useState("");
 
@@ -403,7 +407,37 @@ if (page === "studio" && selectedStudio) {
         <div style={{ marginTop: 30, maxWidth: 500 }}>
 
   <h3>Request a booking</h3>
+<input
+  placeholder="Your name"
+  value={bookingForm.name}
+  onChange={(e) =>
+    setBookingForm({ ...bookingForm, name: e.target.value })
+  }
+  style={wideInput}
+/>
 
+<input
+  type="email"
+  placeholder="Email address"
+  value={bookingForm.email}
+  onChange={(e) =>
+    setBookingForm({ ...bookingForm, email: e.target.value })
+  }
+  style={wideInput}
+/>
+
+<input
+  type="tel"
+  placeholder="Phone number"
+  value={bookingForm.phone}
+  onChange={(e) =>
+    setBookingForm({ ...bookingForm, phone: e.target.value })
+  }
+  style={wideInput}
+/>
+
+
+          
   <select
     value={bookingForm.shootType}
     onChange={(e) =>
@@ -441,10 +475,53 @@ if (page === "studio" && selectedStudio) {
 
   <button
     style={primaryDarkButton}
-    onClick={() =>
-      setBookingMessage("Booking request sent to studio!")
+    onClick={async () => {
+
+  if (!bookingForm.name || !bookingForm.email) {
+    setBookingMessage("Please enter your name and email");
+    return;
+  }
+
+  try {
+
+    const res = await fetch(`${API_URL}/api/bookings`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        studio: selectedStudio.name,
+        name: bookingForm.name,
+        email: bookingForm.email,
+        phone: bookingForm.phone,
+        shootType: bookingForm.shootType,
+        date: bookingForm.date,
+        notes: bookingForm.notes
+      })
+    });
+
+    if (!res.ok) {
+      setBookingMessage("Failed to send booking request");
+      return;
     }
-  >
+
+    setBookingMessage("Booking request sent to studio!");
+
+    setBookingForm({
+      name: "",
+      email: "",
+      phone: "",
+      shootType: "Residential",
+      date: "",
+      notes: ""
+    });
+
+  } catch (error) {
+    setBookingMessage("Server connection failed");
+  }
+
+}}
+
     Send booking request
   </button>
 
