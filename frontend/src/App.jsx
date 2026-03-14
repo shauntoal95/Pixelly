@@ -35,9 +35,44 @@ const [bookingMessage, setBookingMessage] = useState("");
   const [ownerData, setOwnerData] = useState(null);
 
   useEffect(() => {
-    const role = localStorage.getItem("pixelly_role");
-    if (role === "business_owner") {
-      setPage("owner");
+
+  const role = localStorage.getItem("pixelly_role");
+
+  if (role === "business_owner") {
+
+    setPage("owner");
+
+    const loadBookings = () => {
+
+      fetch(`${API_URL}/api/bookings`)
+        .then(res => res.json())
+        .then(data => {
+
+          const formatted = data.map(b => ({
+            id: b.id,
+            client: b.name,
+            category: b.shootType,
+            requested: b.date,
+            status: b.status
+          }));
+
+          setOwnerData({
+            fullName: localStorage.getItem("pixelly_full_name") || "Studio Owner",
+            notifications: formatted,
+            trialDaysRemaining: 14
+          });
+
+        });
+
+    };
+
+    loadBookings();
+
+    setInterval(loadBookings, 5000); // refresh every 5 seconds
+  }
+
+}, []);
+
       fetch(`${API_URL}/api/bookings`)
   .then(res => res.json())
   .then(data => {
