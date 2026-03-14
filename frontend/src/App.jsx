@@ -280,6 +280,50 @@ export default function App() {
       </div>
     );
   }
+  
+if (page === "search") {
+  return (
+    <div style={pageStyle}>
+      <TopNav
+        onGoHome={() => setPage("home")}
+        onSignup={() => setPage("signup")}
+        onLogin={() => setPage("login")}
+      />
+
+      <main style={containerStyle}>
+        <h1 style={{ fontSize: 46, marginBottom: 30 }}>
+          Studios near {search.location || "your area"}
+        </h1>
+
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(3, 1fr)",
+          gap: 20
+        }}>
+
+          <div style={ownerCard}>
+            <h3>North Coast Media</h3>
+            <p style={mutedText}>Residential • Commercial</p>
+            <button style={primaryDarkButton}>View Studio</button>
+          </div>
+
+          <div style={ownerCard}>
+            <h3>Harper Visuals</h3>
+            <p style={mutedText}>Wedding • Events</p>
+            <button style={primaryDarkButton}>View Studio</button>
+          </div>
+
+          <div style={ownerCard}>
+            <h3>Studio Atlantic</h3>
+            <p style={mutedText}>Products • Social Media</p>
+            <button style={primaryDarkButton}>View Studio</button>
+          </div>
+
+        </div>
+      </main>
+    </div>
+  );
+}
 
   return (
     <div style={pageStyle}>
@@ -326,7 +370,13 @@ export default function App() {
                     <option>Landscape</option>
                     <option>Products</option>
                   </select>
-                  <button style={searchButton}>Book now</button>
+                  <button
+  style={searchButton}
+  onClick={() => setPage("search")}
+>
+  Book now
+</button>
+
                 </div>
               </div>
             </div>
