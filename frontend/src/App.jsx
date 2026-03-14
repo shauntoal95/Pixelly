@@ -1,27 +1,51 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
 export default function App() {
-  const [mode, setMode] = useState("signup");
-  const [form, setForm] = useState({
+  const [page, setPage] = useState("home");
+  const [search, setSearch] = useState({
+    location: "",
+    shootType: "All"
+  });
+  const [signupForm, setSignupForm] = useState({
     businessName: "",
     ownerName: "",
     email: "",
     password: ""
   });
-  const [login, setLogin] = useState({
+  const [loginForm, setLoginForm] = useState({
     email: "",
     password: ""
   });
   const [message, setMessage] = useState("");
+  const [ownerData, setOwnerData] = useState(null);
 
-  const onChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+  useEffect(() => {
+    const role = localStorage.getItem("pixelly_role");
+    if (role === "business_owner") {
+      setPage("owner");
+      setOwnerData({
+        fullName: localStorage.getItem("pixelly_full_name") || "Studio Owner",
+        notifications: [
+          { id: 1, client: "Harper Estates", category: "Residential", requested: "18 Mar 09:00" },
+          { id: 2, client: "Ella Morgan", category: "Wedding / Proposal", requested: "20 Mar 12:00" }
+        ],
+        trialDaysRemaining: 14
+      });
+    }
+  }, []);
+
+  const onSignupChange = (e) => {
+    setSignupForm({ ...signupForm, [e.target.name]: e.target.value });
   };
 
   const onLoginChange = (e) => {
-    setLogin({ ...login, [e.target.name]: e.target.value });
+    setLoginForm({ ...loginForm, [e.target.name]: e.target.value });
+  };
+
+  const onSearchChange = (e) => {
+    setSearch({ ...search, [e.target.name]: e.target.value });
   };
 
   const handleSignup = async (e) => {
@@ -34,7 +58,7 @@ export default function App() {
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify(form)
+        body: JSON.stringify(signupForm)
       });
 
       const data = await res.json();
@@ -44,7 +68,12 @@ export default function App() {
         return;
       }
 
-      setMessage(`Success. Your 14-day trial is active until ${new Date(data.trialEnds).toLocaleDateString()}.`);
+      setMessage(
+        `Success. Your 14-day trial is active until ${new Date(
+          data.trialEnds
+        ).toLocaleDateString()}.`
+      );
+      setPage("login");
     } catch (error) {
       setMessage("Something went wrong. Please try again.");
     }
@@ -60,7 +89,7 @@ export default function App() {
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify(login)
+        body: JSON.stringify(loginForm)
       });
 
       const data = await res.json();
@@ -72,145 +101,599 @@ export default function App() {
 
       localStorage.setItem("pixelly_token", data.token);
       localStorage.setItem("pixelly_role", data.role);
+      localStorage.setItem("pixelly_business_id", data.businessId || "");
+      localStorage.setItem("pixelly_full_name", data.fullName || "");
 
       if (data.role === "business_owner") {
-        setMessage("Login successful. Owner dashboard is next.");
-      } else if (data.role === "team_member") {
-        setMessage("Login successful. Team dashboard is next.");
-      } else if (data.role === "platform_owner") {
-        setMessage("Login successful. Admin dashboard is next.");
+        setOwnerData({
+          fullName: data.fullName || "Studio Owner",
+          notifications: [
+            { id: 1, client: "Harper Estates", category: "Residential", requested: "18 Mar 09:00" },
+            { id: 2, client: "Ella Morgan", category: "Wedding / Proposal", requested: "20 Mar 12:00" }
+          ],
+          trialDaysRemaining: 14
+        });
+        setMessage("");
+        setPage("owner");
       } else {
-        setMessage("Login successful.");
+        setMessage(`Login successful as ${data.role}`);
       }
     } catch (error) {
       setMessage("Something went wrong. Please try again.");
     }
   };
 
-  return (
-    <div style={{ minHeight: "100vh", background: "#f5f2ec", color: "#14213d", fontFamily: "Inter, Arial, sans-serif" }}>
-      <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "24px 32px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <div style={{
-            width: 44,
-            height: 44,
-            borderRadius: 12,
-            background: "#14213d",
-            color: "white",
-            display: "grid",
-            placeItems: "center",
-            fontWeight: 700
-          }}>
-            P
-          </div>
-          <div>
-            <div style={{ fontSize: 32, fontWeight: 700 }}>Pixelly</div>
-            <div style={{ color: "#5f6b7a" }}>Marketplace + studio operations</div>
-          </div>
-        </div>
-        <div style={{ display: "flex", gap: 12 }}>
-          <button onClick={() => setMode("signup")} style={tabStyle(mode === "signup")}>Business signup</button>
-          <button onClick={() => setMode("login")} style={tabStyle(mode === "login")}>Studio login</button>
-        </div>
-      </header>
+  const logout = () => {
+    localStorage.removeItem("pixelly_token");
+    localStorage.removeItem("pixelly_role");
+    localStorage.removeItem("pixelly_business_id");
+    localStorage.removeItem("pixelly_full_name");
+    setOwnerData(null);
+    setMessage("");
+    setPage("home");
+  };
 
-      <main style={{ maxWidth: 1100, margin: "0 auto", padding: "24px 32px 60px" }}>
-        <section style={{
-          background: "#24324b",
-          color: "white",
-          borderRadius: 28,
-          padding: 36,
-          display: "grid",
-          gridTemplateColumns: "1.3fr 1fr",
-          gap: 28
-        }}>
-          <div>
-            <div style={{ letterSpacing: 2, fontSize: 12, marginBottom: 18, opacity: 0.85 }}>
-              RUN YOUR MEDIA BUSINESS IN ONE PLACE
+  if (page === "owner" && ownerData) {
+    return (
+      <div style={pageStyle}>
+        <TopNav
+          onGoHome={() => setPage("home")}
+          onSignup={() => setPage("signup")}
+          onLogin={() => setPage("login")}
+          showAuth={false}
+        />
+        <main style={containerStyle}>
+          <section style={ownerHero}>
+            <div>
+              <div style={eyebrow}>STUDIO DASHBOARD</div>
+              <h1 style={ownerTitle}>Welcome back, {ownerData.fullName}</h1>
+              <p style={ownerText}>
+                New bookings appear here first. From here you can review requests and then open the calendar to check availability.
+              </p>
             </div>
-            <h1 style={{ fontSize: 64, lineHeight: 1.02, margin: "0 0 18px", fontWeight: 800 }}>
-              Sign up to Pixelly and start your 14-day free trial.
-            </h1>
-            <p style={{ fontSize: 20, lineHeight: 1.5, opacity: 0.92 }}>
-              Manage bookings, team calendars, jobs, blocked time, and studio operations from one platform.
-            </p>
-          </div>
+            <button onClick={logout} style={secondaryDarkButton}>Log out</button>
+          </section>
 
-          <div style={{
-            background: "rgba(255,255,255,0.08)",
-            borderRadius: 24,
-            padding: 24
-          }}>
-            {mode === "signup" ? (
-              <form onSubmit={handleSignup} style={{ display: "grid", gap: 14 }}>
-                <h2 style={{ margin: 0 }}>Create your business account</h2>
-                <input name="businessName" placeholder="Business name" value={form.businessName} onChange={onChange} style={inputStyle} />
-                <input name="ownerName" placeholder="Owner name" value={form.ownerName} onChange={onChange} style={inputStyle} />
-                <input name="email" type="email" placeholder="Email address" value={form.email} onChange={onChange} style={inputStyle} />
-                <input name="password" type="password" placeholder="Password" value={form.password} onChange={onChange} style={inputStyle} />
-                <button type="submit" style={primaryButton}>Start free trial</button>
-                <p style={{ margin: 0, fontSize: 14, opacity: 0.85 }}>
-                  £49/month for the owner account after trial. Add team members later for £10/month each.
-                </p>
-              </form>
-            ) : (
-              <form onSubmit={handleLogin} style={{ display: "grid", gap: 14 }}>
-                <h2 style={{ margin: 0 }}>Studio login</h2>
-                <input name="email" type="email" placeholder="Email address" value={login.email} onChange={onLoginChange} style={inputStyle} />
-                <input name="password" type="password" placeholder="Password" value={login.password} onChange={onLoginChange} style={inputStyle} />
-                <button type="submit" style={primaryButton}>Log in</button>
-                <p style={{ margin: 0, fontSize: 14, opacity: 0.85 }}>
-                  Business owners, team members and platform admin will be routed to the correct dashboard next.
-                </p>
-              </form>
-            )}
+          <div style={ownerGrid}>
+            <section style={ownerCard}>
+              <div style={cardEyebrow}>NEW BOOKINGS</div>
+              <h2 style={cardTitle}>Requests waiting for review</h2>
+              {ownerData.notifications.map((item) => (
+                <div key={item.id} style={rowStyle}>
+                  <div>
+                    <div style={{ fontWeight: 700 }}>{item.client}</div>
+                    <div style={{ color: "#637084" }}>{item.category}</div>
+                  </div>
+                  <div style={{ fontWeight: 600 }}>{item.requested}</div>
+                </div>
+              ))}
+            </section>
+
+            <section style={ownerCard}>
+              <div style={cardEyebrow}>TRIAL STATUS</div>
+              <h2 style={cardTitle}>{ownerData.trialDaysRemaining} days remaining</h2>
+              <p style={mutedText}>Your studio is active and currently in the free trial period.</p>
+              <button style={primaryDarkButton}>Open calendar</button>
+            </section>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  if (page === "signup") {
+    return (
+      <div style={pageStyle}>
+        <TopNav
+          onGoHome={() => setPage("home")}
+          onSignup={() => setPage("signup")}
+          onLogin={() => setPage("login")}
+        />
+        <main style={authPageWrap}>
+          <section style={authCard}>
+            <div style={eyebrow}>BUSINESS / STUDIO SIGNUP</div>
+            <h1 style={authTitle}>Create your Pixelly studio account</h1>
+            <p style={authText}>
+              Start your 14-day free trial and set up your studio dashboard, bookings, and team management.
+            </p>
+
+            <form onSubmit={handleSignup} style={formGrid}>
+              <input
+                name="businessName"
+                placeholder="Business / studio name"
+                value={signupForm.businessName}
+                onChange={onSignupChange}
+                style={wideInput}
+              />
+              <input
+                name="ownerName"
+                placeholder="Your name"
+                value={signupForm.ownerName}
+                onChange={onSignupChange}
+                style={wideInput}
+              />
+              <input
+                name="email"
+                type="email"
+                placeholder="Email address"
+                value={signupForm.email}
+                onChange={onSignupChange}
+                style={wideInput}
+              />
+              <input
+                name="password"
+                type="password"
+                placeholder="Password"
+                value={signupForm.password}
+                onChange={onSignupChange}
+                style={wideInput}
+              />
+              <button type="submit" style={fullButton}>Start free trial</button>
+            </form>
+
+            {message && <div style={messageBox}>{message}</div>}
+          </section>
+        </main>
+      </div>
+    );
+  }
+
+  if (page === "login") {
+    return (
+      <div style={pageStyle}>
+        <TopNav
+          onGoHome={() => setPage("home")}
+          onSignup={() => setPage("signup")}
+          onLogin={() => setPage("login")}
+        />
+        <main style={authPageWrap}>
+          <section style={authCard}>
+            <div style={eyebrow}>BUSINESS / STUDIO LOGIN</div>
+            <h1 style={authTitle}>Sign in to your Pixelly account</h1>
+            <p style={authText}>
+              Access your bookings, calendar, team schedules, and studio dashboard.
+            </p>
+
+            <form onSubmit={handleLogin} style={formGrid}>
+              <input
+                name="email"
+                type="email"
+                placeholder="Email address"
+                value={loginForm.email}
+                onChange={onLoginChange}
+                style={wideInput}
+              />
+              <input
+                name="password"
+                type="password"
+                placeholder="Password"
+                value={loginForm.password}
+                onChange={onLoginChange}
+                style={wideInput}
+              />
+              <button type="submit" style={fullButton}>Sign in</button>
+            </form>
+
+            {message && <div style={messageBox}>{message}</div>}
+          </section>
+        </main>
+      </div>
+    );
+  }
+
+  return (
+    <div style={pageStyle}>
+      <TopNav
+        onGoHome={() => setPage("home")}
+        onSignup={() => setPage("signup")}
+        onLogin={() => setPage("login")}
+      />
+
+      <main>
+        <section style={landingHero}>
+          <div style={heroOverlay}>
+            <div style={heroContent}>
+              <div style={eyebrowLight}>FIND TRUSTED PHOTOGRAPHERS, VIDEOGRAPHERS AND MEDIA PROFESSIONALS</div>
+              <h1 style={landingTitle}>
+                Book the right creative for your shoot.
+              </h1>
+              <p style={landingText}>
+                Search by location and type of shoot, compare local professionals, and find the right fit for your booking.
+              </p>
+
+              <div style={searchCard}>
+                <div style={searchGrid}>
+                  <input
+                    name="location"
+                    placeholder="Enter location or postcode"
+                    value={search.location}
+                    onChange={onSearchChange}
+                    style={searchInput}
+                  />
+                  <select
+                    name="shootType"
+                    value={search.shootType}
+                    onChange={onSearchChange}
+                    style={searchInput}
+                  >
+                    <option>All</option>
+                    <option>Residential</option>
+                    <option>Wedding / Proposal</option>
+                    <option>Commercial</option>
+                    <option>Event</option>
+                    <option>Hospitality</option>
+                    <option>Social Media</option>
+                    <option>Landscape</option>
+                    <option>Products</option>
+                  </select>
+                  <button style={searchButton}>Book now</button>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 
-        {message && (
-          <div style={{
-            marginTop: 24,
-            background: "white",
-            border: "1px solid #d9d4ca",
-            borderRadius: 18,
-            padding: 18,
-            fontSize: 16
-          }}>
-            {message}
+        <section style={sectionWrap}>
+          <div style={infoGrid}>
+            <div style={infoCard}>
+              <div style={cardEyebrow}>HOW IT WORKS</div>
+              <h2 style={cardTitle}>Search locally</h2>
+              <p style={mutedText}>
+                Enter your area and type of shoot to discover local creative professionals and media companies.
+              </p>
+            </div>
+            <div style={infoCard}>
+              <div style={cardEyebrow}>BOOKING</div>
+              <h2 style={cardTitle}>Review availability later</h2>
+              <p style={mutedText}>
+                Dates and availability appear on the profile page, keeping the search step clean and simple.
+              </p>
+            </div>
+            <div style={infoCard}>
+              <div style={cardEyebrow}>FOR STUDIOS</div>
+              <h2 style={cardTitle}>Run your business in one place</h2>
+              <p style={mutedText}>
+                Bookings, team schedules, blocked time, jobs and studio operations all live in one dashboard.
+              </p>
+            </div>
           </div>
-        )}
+        </section>
       </main>
     </div>
   );
 }
 
-function tabStyle(active) {
-  return {
-    background: active ? "#14213d" : "white",
-    color: active ? "white" : "#14213d",
-    border: "1px solid #d9d4ca",
-    padding: "12px 18px",
-    borderRadius: 16,
-    cursor: "pointer",
-    fontWeight: 600
-  };
+function TopNav({ onGoHome, onSignup, onLogin, showAuth = true }) {
+  return (
+    <header style={topNav}>
+      <button onClick={onGoHome} style={brandButton}>
+        <div style={logoStyle}>P</div>
+        <div>
+          <div style={{ fontSize: 30, fontWeight: 700, color: "#14213d", textAlign: "left" }}>Pixelly</div>
+          <div style={{ color: "#637084", textAlign: "left" }}>Marketplace + studio operations</div>
+        </div>
+      </button>
+
+      {showAuth && (
+        <div style={authTopBox}>
+          <button onClick={onSignup} style={primaryDarkButton}>Business / Studio signup</button>
+          <button onClick={onLogin} style={lightButton}>Business / Studio login</button>
+        </div>
+      )}
+    </header>
+  );
 }
 
-const inputStyle = {
-  width: "100%",
-  padding: "14px 16px",
-  borderRadius: 14,
-  border: "1px solid #d9d4ca",
-  fontSize: 16
+const pageStyle = {
+  minHeight: "100vh",
+  background: "#f6f1ea",
+  color: "#14213d",
+  fontFamily: "Inter, Arial, sans-serif"
 };
 
-const primaryButton = {
+const topNav = {
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  padding: "24px 36px"
+};
+
+const brandButton = {
+  display: "flex",
+  alignItems: "center",
+  gap: 14,
+  background: "transparent",
+  border: "none",
+  cursor: "pointer"
+};
+
+const authTopBox = {
+  display: "flex",
+  gap: 12,
+  padding: 10,
+  background: "rgba(255,255,255,0.92)",
+  borderRadius: 22,
+  boxShadow: "0 12px 30px rgba(20,33,61,0.08)"
+};
+
+const logoStyle = {
+  width: 46,
+  height: 46,
+  borderRadius: 14,
+  background: "#14213d",
+  color: "white",
+  display: "grid",
+  placeItems: "center",
+  fontWeight: 700,
+  fontSize: 20
+};
+
+const landingHero = {
+  minHeight: "78vh",
+  margin: "0 36px",
+  borderRadius: 34,
+  overflow: "hidden",
+  backgroundImage:
+    "linear-gradient(rgba(18,28,48,0.52), rgba(18,28,48,0.58)), url('https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?auto=format&fit=crop&w=1600&q=80')",
+  backgroundSize: "cover",
+  backgroundPosition: "center",
+  display: "flex",
+  alignItems: "center"
+};
+
+const heroOverlay = {
+  width: "100%",
+  padding: "60px 54px"
+};
+
+const heroContent = {
+  maxWidth: 920
+};
+
+const eyebrowLight = {
+  letterSpacing: 2,
+  fontSize: 12,
+  color: "rgba(255,255,255,0.88)",
+  marginBottom: 16
+};
+
+const landingTitle = {
+  fontSize: 76,
+  lineHeight: 0.98,
+  color: "white",
+  margin: "0 0 20px",
+  maxWidth: 800
+};
+
+const landingText = {
+  fontSize: 22,
+  lineHeight: 1.5,
+  color: "rgba(255,255,255,0.92)",
+  maxWidth: 760,
+  marginBottom: 28
+};
+
+const searchCard = {
+  background: "rgba(255,255,255,0.96)",
+  borderRadius: 26,
+  padding: 18,
+  maxWidth: 980,
+  boxShadow: "0 18px 40px rgba(0,0,0,0.14)"
+};
+
+const searchGrid = {
+  display: "grid",
+  gridTemplateColumns: "1.4fr 1fr auto",
+  gap: 14
+};
+
+const searchInput = {
+  width: "100%",
+  minWidth: 0,
+  padding: "18px 20px",
+  borderRadius: 18,
+  border: "1px solid #ddd6c9",
+  fontSize: 17,
+  background: "white"
+};
+
+const searchButton = {
   background: "#14213d",
   color: "white",
   border: "none",
+  borderRadius: 18,
+  padding: "18px 26px",
+  fontSize: 17,
+  fontWeight: 700,
+  cursor: "pointer"
+};
+
+const sectionWrap = {
+  maxWidth: 1280,
+  margin: "0 auto",
+  padding: "34px 36px 60px"
+};
+
+const infoGrid = {
+  display: "grid",
+  gridTemplateColumns: "repeat(3, 1fr)",
+  gap: 22
+};
+
+const infoCard = {
+  background: "white",
+  border: "1px solid #e4ddd1",
+  borderRadius: 24,
+  padding: 28,
+  boxShadow: "0 10px 24px rgba(20,33,61,0.04)"
+};
+
+const authPageWrap = {
+  maxWidth: 760,
+  margin: "0 auto",
+  padding: "30px 24px 70px"
+};
+
+const authCard = {
+  background: "white",
+  borderRadius: 30,
+  padding: 34,
+  border: "1px solid #e4ddd1",
+  boxShadow: "0 18px 40px rgba(20,33,61,0.06)"
+};
+
+const authTitle = {
+  fontSize: 48,
+  lineHeight: 1.05,
+  margin: "0 0 14px"
+};
+
+const authText = {
+  fontSize: 18,
+  lineHeight: 1.5,
+  color: "#637084",
+  marginBottom: 24
+};
+
+const formGrid = {
+  display: "grid",
+  gap: 16
+};
+
+const wideInput = {
+  width: "100%",
+  padding: "18px 20px",
+  borderRadius: 18,
+  border: "1px solid #d9d4ca",
+  fontSize: 17,
+  boxSizing: "border-box"
+};
+
+const fullButton = {
+  width: "100%",
+  background: "#14213d",
+  color: "white",
+  border: "none",
+  padding: "18px 20px",
+  borderRadius: 18,
+  fontSize: 17,
+  fontWeight: 700,
+  cursor: "pointer"
+};
+
+const messageBox = {
+  marginTop: 20,
+  background: "#f8f7f3",
+  border: "1px solid #ddd6c9",
+  borderRadius: 18,
+  padding: 18,
+  fontSize: 16
+};
+
+const ownerHero = {
+  background: "#24324b",
+  color: "white",
+  borderRadius: 28,
+  padding: 34,
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "flex-start",
+  gap: 24
+};
+
+const containerStyle = {
+  maxWidth: 1200,
+  margin: "0 auto",
+  padding: "20px 36px 60px"
+};
+
+const ownerGrid = {
+  display: "grid",
+  gridTemplateColumns: "1.3fr 1fr",
+  gap: 24,
+  marginTop: 24
+};
+
+const ownerCard = {
+  background: "white",
+  borderRadius: 24,
+  padding: 24,
+  border: "1px solid #e4ddd1"
+};
+
+const ownerTitle = {
+  fontSize: 52,
+  margin: "0 0 14px"
+};
+
+const ownerText = {
+  fontSize: 19,
+  lineHeight: 1.5,
+  margin: 0,
+  maxWidth: 720
+};
+
+const eyebrow = {
+  letterSpacing: 2,
+  fontSize: 12,
+  color: "#4f6da3",
+  marginBottom: 12
+};
+
+const cardEyebrow = {
+  letterSpacing: 2,
+  fontSize: 12,
+  color: "#4f6da3",
+  marginBottom: 10
+};
+
+const cardTitle = {
+  fontSize: 28,
+  margin: "0 0 14px"
+};
+
+const mutedText = {
+  color: "#637084",
+  lineHeight: 1.6
+};
+
+const rowStyle = {
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  padding: "14px 0",
+  borderBottom: "1px solid #ece7dd"
+};
+
+const primaryDarkButton = {
+  background: "#14213d",
+  color: "white",
+  border: "none",
+  padding: "14px 20px",
+  borderRadius: 16,
+  fontSize: 15,
+  fontWeight: 700,
+  cursor: "pointer"
+};
+
+const secondaryDarkButton = {
+  background: "white",
+  color: "#14213d",
+  border: "1px solid rgba(255,255,255,0.2)",
   padding: "14px 18px",
   borderRadius: 16,
-  fontSize: 16,
+  fontSize: 15,
+  fontWeight: 700,
+  cursor: "pointer"
+};
+
+const lightButton = {
+  background: "white",
+  color: "#14213d",
+  border: "1px solid #d9d4ca",
+  padding: "14px 20px",
+  borderRadius: 16,
+  fontSize: 15,
   fontWeight: 700,
   cursor: "pointer"
 };
