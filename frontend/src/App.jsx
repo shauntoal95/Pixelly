@@ -191,7 +191,7 @@ export default function App() {
         />
         <main style={authPageWrap}>
           <section style={authCard}>
-            <div style={eyebrow}>BUSINESS / STUDIO SIGNUP</div>
+            <div style={eyebrow}>BUSINESS SIGNUP</div>
             <h1 style={authTitle}>Create your Pixelly studio account</h1>
             <p style={authText}>
               Start your 14-day free trial and set up your studio dashboard, bookings, and team management.
@@ -248,7 +248,7 @@ export default function App() {
         />
         <main style={authPageWrap}>
           <section style={authCard}>
-            <div style={eyebrow}>BUSINESS / STUDIO LOGIN</div>
+            <div style={eyebrow}>BUSINESS LOGIN</div>
             <h1 style={authTitle}>Sign in to your Pixelly account</h1>
             <p style={authText}>
               Access your bookings, calendar, team schedules, and studio dashboard.
