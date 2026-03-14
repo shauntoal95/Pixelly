@@ -4,6 +4,7 @@ const API_URL = import.meta.env.VITE_API_URL;
 
 export default function App() {
   const [page, setPage] = useState("home");
+  const [selectedStudio, setSelectedStudio] = useState(null);
   const [search, setSearch] = useState({
     location: "",
     shootType: "All"
@@ -304,19 +305,55 @@ if (page === "search") {
           <div style={ownerCard}>
             <h3>North Coast Media</h3>
             <p style={mutedText}>Residential • Commercial</p>
-            <button style={primaryDarkButton}>View Studio</button>
+            <button
+  style={primaryDarkButton}
+  onClick={() => {
+    setSelectedStudio({
+      name: "North Coast Media",
+      type: "Residential • Commercial"
+    });
+    setPage("studio");
+  }}
+>
+  View Studio
+</button>
+
           </div>
 
           <div style={ownerCard}>
             <h3>Harper Visuals</h3>
             <p style={mutedText}>Wedding • Events</p>
-            <button style={primaryDarkButton}>View Studio</button>
+            <button
+  style={primaryDarkButton}
+  onClick={() => {
+    setSelectedStudio({
+      name: "Harper Visuals",
+      type: "Wedding • Events"
+    });
+    setPage("studio");
+  }}
+>
+  View Studio
+</button>
+
           </div>
 
           <div style={ownerCard}>
             <h3>Studio Atlantic</h3>
             <p style={mutedText}>Products • Social Media</p>
-            <button style={primaryDarkButton}>View Studio</button>
+            <button
+  style={primaryDarkButton}
+  onClick={() => {
+    setSelectedStudio({
+      name: "Studio Atlantic",
+      type: "Products • Social Media"
+    });
+    setPage("studio");
+  }}
+>
+  View Studio
+</button>
+
           </div>
 
         </div>
@@ -325,6 +362,45 @@ if (page === "search") {
   );
 }
 
+if (page === "studio" && selectedStudio) {
+  return (
+    <div style={pageStyle}>
+      <TopNav
+        onGoHome={() => setPage("home")}
+        onSignup={() => setPage("signup")}
+        onLogin={() => setPage("login")}
+      />
+
+      <main style={containerStyle}>
+        <h1 style={{ fontSize: 52 }}>{selectedStudio.name}</h1>
+
+        <p style={{ fontSize: 20, marginBottom: 20 }}>
+          {selectedStudio.type}
+        </p>
+
+        <img
+          src="https://images.unsplash.com/photo-1502920917128-1aa500764cbd"
+          style={{
+            width: "100%",
+            maxWidth: 700,
+            borderRadius: 20,
+            marginBottom: 30
+          }}
+        />
+
+        <p style={mutedText}>
+          Professional photography services available for bookings.
+        </p>
+
+        <button style={primaryDarkButton}>
+          Send booking request
+        </button>
+      </main>
+    </div>
+  );
+}
+
+  
   return (
     <div style={pageStyle}>
       <TopNav
