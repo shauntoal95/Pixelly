@@ -5,6 +5,14 @@ const API_URL = import.meta.env.VITE_API_URL;
 export default function App() {
   const [page, setPage] = useState("home");
   const [selectedStudio, setSelectedStudio] = useState(null);
+  const [bookingForm, setBookingForm] = useState({
+  shootType: "Residential",
+  date: "",
+  notes: ""
+});
+
+const [bookingMessage, setBookingMessage] = useState("");
+
   const [search, setSearch] = useState({
     location: "",
     shootType: "All"
@@ -392,9 +400,60 @@ if (page === "studio" && selectedStudio) {
           Professional photography services available for bookings.
         </p>
 
-        <button style={primaryDarkButton}>
-          Send booking request
-        </button>
+        <div style={{ marginTop: 30, maxWidth: 500 }}>
+
+  <h3>Request a booking</h3>
+
+  <select
+    value={bookingForm.shootType}
+    onChange={(e) =>
+      setBookingForm({ ...bookingForm, shootType: e.target.value })
+    }
+    style={wideInput}
+  >
+    <option>Residential</option>
+    <option>Wedding</option>
+    <option>Commercial</option>
+    <option>Event</option>
+    <option>Products</option>
+  </select>
+
+  <input
+    type="date"
+    value={bookingForm.date}
+    onChange={(e) =>
+      setBookingForm({ ...bookingForm, date: e.target.value })
+    }
+    style={wideInput}
+  />
+
+  <textarea
+    placeholder="Additional details"
+    value={bookingForm.notes}
+    onChange={(e) =>
+      setBookingForm({ ...bookingForm, notes: e.target.value })
+    }
+    style={{
+      ...wideInput,
+      height: 120
+    }}
+  />
+
+  <button
+    style={primaryDarkButton}
+    onClick={() =>
+      setBookingMessage("Booking request sent to studio!")
+    }
+  >
+    Send booking request
+  </button>
+
+  {bookingMessage && (
+    <div style={{ marginTop: 15 }}>{bookingMessage}</div>
+  )}
+
+</div>
+
       </main>
     </div>
   );
