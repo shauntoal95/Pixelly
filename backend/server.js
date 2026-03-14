@@ -2,6 +2,8 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import authRoutes from "./auth.js";
+import supabase from "./supabase.js";
+
 
 dotenv.config();
 
@@ -25,9 +27,22 @@ let bookings = [];
 HEALTH CHECK
 ---------------------------------------
 */
-app.get("/healthz", (_req, res) => {
-  res.json({ ok: true, app: "Pixelly API" });
+app.get("/api/bookings", async (_req, res) => {
+
+  const { data, error } = await supabase
+    .from("bookings")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Failed to fetch bookings" });
+  }
+
+  res.json(data);
+
 });
+
 
 /*
 ---------------------------------------
@@ -41,21 +56,33 @@ app.use("/api/auth", authRoutes);
 CREATE BOOKING
 ---------------------------------------
 */
-app.post("/api/bookings", (req, res) => {
+app.post("/api/bookings", async (req, res) => {
 
   const booking = {
-    id: Date.now(),
-    status: "pending",
-    ...req.body
+    studio: req.body.studio,
+    name: req.body.name,
+    email: req.body.email,
+    phone: req.body.phone,
+    shoottype: req.body.shootType,
+    date: req.body.date,
+    notes: req.body.notes,
+    status: "pending"
   };
 
-  bookings.push(booking);
+  const { data, error } = await supabase
+    .from("bookings")
+    .insert([booking])
+    .select();
 
-  console.log("New booking received:", booking);
+  if (error) {
+    console.error("Supabase error:", error);
+    return res.status(500).json({ error: "Database insert failed" });
+  }
 
-  res.json({ success: true });
+  res.json({ success: true, booking: data });
 
 });
+
 
 /*
 ---------------------------------------
