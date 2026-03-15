@@ -7,21 +7,24 @@ const router = express.Router();
 
 router.post("/signup/business", async (req, res) => {
   try {
-   const { businessName, ownerName, email, password, city, postcode } = req.body;
+   const { businessName, ownerName, email, password, city, postcode, serviceRadius } = req.body;
+
 
     const passwordHash = await bcrypt.hash(password, 10);
 
      const { data: business, error: businessError } = await supabase
     .from("businesses")
     .insert([
-      {
-        business_name: businessName,
-        owner_name: ownerName,
-        owner_email: email,
-        city: city,
-        postcode: postcode
-      }
-    ])
+  {
+    business_name: businessName,
+    owner_name: ownerName,
+    owner_email: email,
+    city: city,
+    postcode: postcode,
+    service_radius: serviceRadius
+  }
+])
+
     .select()
     .single();
 
