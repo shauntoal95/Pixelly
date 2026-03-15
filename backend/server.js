@@ -129,9 +129,17 @@ GET ALL BUSINESSES (STUDIOS)
 
 app.get("/api/studios", async (req, res) => {
 
-  const { data, error } = await supabase
+  const { postcode } = req.query;
+
+  let query = supabase
     .from("businesses")
-    .select("id, business_name");
+    .select("id, business_name, city, postcode");
+
+  if (postcode) {
+    query = query.ilike("postcode", `${postcode}%`);
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     return res.status(500).json({ error: error.message });
@@ -139,7 +147,6 @@ app.get("/api/studios", async (req, res) => {
 
   res.json(data);
 });
-
 
 
 /*
