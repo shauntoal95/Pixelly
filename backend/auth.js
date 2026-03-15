@@ -11,22 +11,29 @@ router.post("/signup/business", async (req, res) => {
 
 
     const passwordHash = await bcrypt.hash(password, 10);
+    const geo = await fetch(`https://api.postcodes.io/postcodes/${postcode}`);
+    const geoData = await geo.json();
+    
+    const latitude = geoData.result.latitude;
+    const longitude = geoData.result.longitude;
+    
+    const { data: business, error: businessError } = await supabase
+      .from("businesses")
+      .insert([
+        {
+          business_name: businessName,
+          owner_name: ownerName,
+          owner_email: email,
+          city: city,
+          postcode: postcode,
+          service_radius: serviceRadius,
+          latitude: latitude,
+          longitude: longitude
+        }
+      ])
+      .select()
+      .single();
 
-     const { data: business, error: businessError } = await supabase
-    .from("businesses")
-    .insert([
-  {
-    business_name: businessName,
-    owner_name: ownerName,
-    owner_email: email,
-    city: city,
-    postcode: postcode,
-    service_radius: serviceRadius
-  }
-])
-
-    .select()
-    .single();
 
 
     if (businessError) {
