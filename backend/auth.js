@@ -7,7 +7,7 @@ const router = express.Router();
 
 router.post("/signup/business", async (req, res) => {
   try {
-    const { businessName, ownerName, email, password } = req.body;
+   const { businessName, ownerName, email, password, city, postcode } = req.body;
 
     const passwordHash = await bcrypt.hash(password, 10);
 
