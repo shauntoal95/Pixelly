@@ -14,10 +14,13 @@ router.post("/signup/business", async (req, res) => {
     const { data: business, error: businessError } = await supabase
       .from("businesses")
       .insert({
-        business_name: businessName,
-        owner_name: ownerName,
-        owner_email: email
-      })
+      business_name: businessName,
+      owner_name: ownerName,
+      owner_email: email,
+      city: city,
+      postcode: postcode
+    })
+
       .select()
       .single();
 
