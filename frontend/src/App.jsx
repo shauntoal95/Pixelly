@@ -80,31 +80,7 @@ useEffect(() => {
   }
 }, []);
 
-
-
-
-      fetch(`${API_URL}/api/bookings`)
-  .then(res => res.json())
-  .then(data => {
-
-    const formatted = data.map(b => ({
-      id: b.id,
-      client: b.name,
-      category: b.shootType,
-      requested: b.date
-    }));
-
-          setOwnerData({
-        fullName: localStorage.getItem("pixelly_full_name") || "Studio Owner",
-        notifications: formatted,
-        trialDaysRemaining: 14
-      });
-    });
-  });
-}, []);
-
-
-
+  
   const onSignupChange = (e) => {
     setSignupForm({ ...signupForm, [e.target.name]: e.target.value });
   };
