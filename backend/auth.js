@@ -11,18 +11,20 @@ router.post("/signup/business", async (req, res) => {
 
     const passwordHash = await bcrypt.hash(password, 10);
 
-    const { data: business, error: businessError } = await supabase
-      .from("businesses")
-      .insert({
-      business_name: businessName,
-      owner_name: ownerName,
-      owner_email: email,
-      city: city,
-      postcode: postcode
-    })
+     const { data: business, error: businessError } = await supabase
+    .from("businesses")
+    .insert([
+      {
+        business_name: businessName,
+        owner_name: ownerName,
+        owner_email: email,
+        city: city,
+        postcode: postcode
+      }
+    ])
+    .select()
+    .single();
 
-      .select()
-      .single();
 
     if (businessError) {
       return res.status(400).json({ error: businessError.message });
