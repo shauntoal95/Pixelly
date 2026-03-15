@@ -122,22 +122,43 @@ app.get("/api/studios", async (req, res) => {
 
   const { postcode } = req.query;
 
-  let query = supabase
-    .from("businesses")
-    .select("id, business_name, city, postcode");
-
-  if (postcode) {
-    query = query.ilike("postcode", `${postcode}%`);
+  if (!postcode) {
+    return res.status(400).json({ error: "Postcode required" });
   }
 
-  const { data, error } = await query;
+  // Convert postcode to coordinates
+  const geo = await fetch(`https://api.postcodes.io/postcodes/${postcode}`);
+  const geoData = await geo.json();
+
+  const userLat = geoData.result.latitude;
+  const userLng = geoData.result.longitude;
+
+  // Get all studios
+  const { data, error } = await supabase
+    .from("businesses")
+    .select("*");
 
   if (error) {
     return res.status(500).json({ error: error.message });
   }
 
-  res.json(data);
+  // Filter by service radius
+  const results = data.filter(studio => {
+
+    const distance =
+      Math.sqrt(
+        Math.pow(userLat - studio.latitude, 2) +
+        Math.pow(userLng - studio.longitude, 2)
+      ) * 69;
+
+    return distance <= studio.service_radius;
+
+  });
+
+  res.json(results);
+
 });
+
 
 
 /*
