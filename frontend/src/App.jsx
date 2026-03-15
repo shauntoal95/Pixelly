@@ -5,8 +5,6 @@ const API_URL = import.meta.env.VITE_API_URL;
 export default function App() {
   const [page, setPage] = useState("home");
   const [selectedStudio, setSelectedStudio] = useState(null);
-  const [page, setPage] = useState("home");
-const [selectedStudio, setSelectedStudio] = useState(null);
 const [studios, setStudios] = useState([]);
   const [bookingForm, setBookingForm] = useState({
   name: "",
@@ -78,9 +76,8 @@ useEffect(() => {
     loadBookings();
 
     setInterval(loadBookings, 5000); // refresh every 5 seconds
-  }
-
 }, []);
+
 
       fetch(`${API_URL}/api/bookings`)
   .then(res => res.json())
