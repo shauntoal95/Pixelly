@@ -5,6 +5,9 @@ const API_URL = import.meta.env.VITE_API_URL;
 export default function App() {
   const [page, setPage] = useState("home");
   const [selectedStudio, setSelectedStudio] = useState(null);
+  const [page, setPage] = useState("home");
+const [selectedStudio, setSelectedStudio] = useState(null);
+const [studios, setStudios] = useState([]);
   const [bookingForm, setBookingForm] = useState({
   name: "",
   email: "",
@@ -35,11 +38,17 @@ const [bookingMessage, setBookingMessage] = useState("");
   const [ownerData, setOwnerData] = useState(null);
 
   useEffect(() => {
+  fetch(`${API_URL}/api/studios`)
+    .then(res => res.json())
+    .then(data => setStudios(data))
+    .catch(err => console.error("Failed to load studios:", err));
+}, []);
 
+/* EXISTING OWNER LOGIN CHECK */
+useEffect(() => {
   const role = localStorage.getItem("pixelly_role");
 
   if (role === "business_owner") {
-
     setPage("owner");
 
     const loadBookings = () => {
@@ -360,65 +369,27 @@ if (page === "search") {
           gap: 20
         }}>
 
-          <div style={ownerCard}>
-            <h3>North Coast Media</h3>
-            <p style={mutedText}>Residential • Commercial</p>
-            <button
-  style={primaryDarkButton}
-  onClick={() => {
-    setSelectedStudio({
-      name: "North Coast Media",
-      type: "Residential • Commercial"
-    });
-    setPage("studio");
-  }}
->
-  View Studio
-</button>
+          
+          {studios.map((studio) => (
+  <div key={studio.id} style={ownerCard}>
+    <h3>{studio.business_name}</h3>
 
-          </div>
+    <p style={mutedText}>Photography Studio</p>
 
-          <div style={ownerCard}>
-            <h3>Harper Visuals</h3>
-            <p style={mutedText}>Wedding • Events</p>
-            <button
-  style={primaryDarkButton}
-  onClick={() => {
-    setSelectedStudio({
-      name: "Harper Visuals",
-      type: "Wedding • Events"
-    });
-    setPage("studio");
-  }}
->
-  View Studio
-</button>
-
-          </div>
-
-          <div style={ownerCard}>
-            <h3>Studio Atlantic</h3>
-            <p style={mutedText}>Products • Social Media</p>
-            <button
-  style={primaryDarkButton}
-  onClick={() => {
-    setSelectedStudio({
-      name: "Studio Atlantic",
-      type: "Products • Social Media"
-    });
-    setPage("studio");
-  }}
->
-  View Studio
-</button>
-
-          </div>
-
-        </div>
-      </main>
-    </div>
-  );
-}
+    <button
+      style={primaryDarkButton}
+      onClick={() => {
+        setSelectedStudio({
+          name: studio.business_name,
+          type: "Photography"
+        });
+        setPage("studio");
+      }}
+    >
+      View Studio
+    </button>
+  </div>
+))}
 
 if (page === "studio" && selectedStudio) {
   return (
