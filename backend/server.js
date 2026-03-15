@@ -20,7 +20,6 @@ TEMP BOOKING STORAGE (for testing)
 This stores bookings in memory.
 Later we will move this to Supabase.
 */
-let bookings = [];
 
 /*
 ---------------------------------------
@@ -89,9 +88,6 @@ app.post("/api/bookings", async (req, res) => {
 GET ALL BOOKINGS
 ---------------------------------------
 */
-app.get("/api/bookings", (_req, res) => {
-  res.json(bookings);
-});
 
 app.patch("/api/bookings/:id", (req, res) => {
 
@@ -115,11 +111,6 @@ app.patch("/api/bookings/:id", (req, res) => {
 GET ALL BOOKINGS
 --------------------------------
 */
-
-app.get("/api/bookings", (_req, res) => {
-  res.json(bookings);
-});
-
 
 /*
 --------------------------------
