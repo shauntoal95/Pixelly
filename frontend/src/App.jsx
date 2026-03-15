@@ -67,21 +67,20 @@ const [bookingMessage, setBookingMessage] = useState("");
   }
 
 }, []);
-        useEffect(() => {
-        
-          if (page !== "search") return;
-        
-          fetch(`${API_URL}/api/studios`)
-            .then(res => res.json())
-            .then(data => {
-              setStudios(data);
-            })
-            .catch(err => {
-              console.error("Failed to load studios", err);
-            });
+       useEffect(() => {
+
+  if (page !== "search") return;
+
+  fetch(`${API_URL}/api/studios?postcode=${search.location}`)
+    .then(res => res.json())
+    .then(data => {
+      setStudios(data);
+    })
+    .catch(err => {
+      console.error("Failed to load studios", err);
+    });
 
 }, [page]);
-
 
   
   const onSignupChange = (e) => {
