@@ -22,11 +22,14 @@ const [bookingMessage, setBookingMessage] = useState("");
     shootType: "All"
   });
   const [signupForm, setSignupForm] = useState({
-    businessName: "",
-    ownerName: "",
-    email: "",
-    password: ""
-  });
+  businessName: "",
+  ownerName: "",
+  email: "",
+  password: "",
+  city: "",
+  postcode: ""
+});
+
   const [loginForm, setLoginForm] = useState({
     email: "",
     password: ""
@@ -252,6 +255,21 @@ const [bookingMessage, setBookingMessage] = useState("");
                 onChange={onSignupChange}
                 style={wideInput}
               />
+                <input
+                name="city"
+                placeholder="City"
+                value={signupForm.city}
+                onChange={onSignupChange}
+                style={wideInput}
+              />
+              
+                <input
+                name="postcode"
+                placeholder="Postcode"
+                value={signupForm.postcode}
+                onChange={onSignupChange}
+                style={wideInput}
+            />
               <button type="submit" style={fullButton}>Start free trial</button>
             </form>
 
