@@ -111,6 +111,38 @@ app.patch("/api/bookings/:id", (req, res) => {
 });
 
 /*
+--------------------------------
+GET ALL BOOKINGS
+--------------------------------
+*/
+
+app.get("/api/bookings", (_req, res) => {
+  res.json(bookings);
+});
+
+
+/*
+--------------------------------
+GET ALL BUSINESSES (STUDIOS)
+--------------------------------
+*/
+
+app.get("/api/studios", async (req, res) => {
+
+  const { data, error } = await supabase
+    .from("businesses")
+    .select("id, business_name");
+
+  if (error) {
+    return res.status(500).json({ error: error.message });
+  }
+
+  res.json(data);
+});
+
+
+
+/*
 ---------------------------------------
 START SERVER
 ---------------------------------------
