@@ -5,6 +5,7 @@ const API_URL = import.meta.env.VITE_API_URL;
 export default function App() {
   const [page, setPage] = useState("home");
   const [selectedStudio, setSelectedStudio] = useState(null);
+  const [studios, setStudios] = useState([]);
   const [bookingForm, setBookingForm] = useState({
   name: "",
   email: "",
@@ -38,31 +39,49 @@ const [bookingMessage, setBookingMessage] = useState("");
   const [ownerData, setOwnerData] = useState(null);
 
   useEffect(() => {
-    const role = localStorage.getItem("pixelly_role");
-    if (role === "business_owner") {
-      setPage("owner");
-      fetch(`${API_URL}/api/bookings`)
-  .then(res => res.json())
-  .then(data => {
+  const role = localStorage.getItem("pixelly_role");
 
-    const formatted = data.map(b => ({
-      id: b.id,
-      client: b.name,
-      category: b.shootType,
-      requested: b.date
-    }));
+  if (role === "business_owner") {
+    setPage("owner");
 
-    setOwnerData({
-      fullName: localStorage.getItem("pixelly_full_name") || "Studio Owner",
-      notifications: formatted,
-      trialDaysRemaining: 14
-    });
+    fetch(`${API_URL}/api/bookings`)
+      .then(res => res.json())
+      .then(data => {
 
-  });
+        const formatted = data.map(b => ({
+          id: b.id,
+          client: b.name,
+          category: b.shootType,
+          requested: b.date
+        }));
 
-    }
-  }, []);
+        setOwnerData({
+          fullName: localStorage.getItem("pixelly_full_name") || "Studio Owner",
+          notifications: formatted,
+          trialDaysRemaining: 14
+        });
 
+      });
+  }
+
+}, []);
+        useEffect(() => {
+        
+          if (page !== "search") return;
+        
+          fetch(`${API_URL}/api/studios`)
+            .then(res => res.json())
+            .then(data => {
+              setStudios(data);
+            })
+            .catch(err => {
+              console.error("Failed to load studios", err);
+            });
+
+}, [page]);
+
+
+  
   const onSignupChange = (e) => {
     setSignupForm({ ...signupForm, [e.target.name]: e.target.value });
   };
@@ -338,66 +357,40 @@ if (page === "search") {
         </h1>
 
         <div style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(3, 1fr)",
-          gap: 20
-        }}>
+  display: "grid",
+  gridTemplateColumns: "repeat(3, 1fr)",
+  gap: 20
+}}>
 
-          <div style={ownerCard}>
-            <h3>North Coast Media</h3>
-            <p style={mutedText}>Residential • Commercial</p>
-            <button
-  style={primaryDarkButton}
-  onClick={() => {
-    setSelectedStudio({
-      name: "North Coast Media",
-      type: "Residential • Commercial"
-    });
-    setPage("studio");
-  }}
->
-  View Studio
-</button>
+{studios.map((studio) => (
 
-          </div>
+  <div key={studio.id} style={ownerCard}>
 
-          <div style={ownerCard}>
-            <h3>Harper Visuals</h3>
-            <p style={mutedText}>Wedding • Events</p>
-            <button
-  style={primaryDarkButton}
-  onClick={() => {
-    setSelectedStudio({
-      name: "Harper Visuals",
-      type: "Wedding • Events"
-    });
-    setPage("studio");
-  }}
->
-  View Studio
-</button>
+    <h3>{studio.business_name}</h3>
 
-          </div>
+    <p style={mutedText}>
+      {studio.city} • {studio.postcode}
+    </p>
 
-          <div style={ownerCard}>
-            <h3>Studio Atlantic</h3>
-            <p style={mutedText}>Products • Social Media</p>
-            <button
-  style={primaryDarkButton}
-  onClick={() => {
-    setSelectedStudio({
-      name: "Studio Atlantic",
-      type: "Products • Social Media"
-    });
-    setPage("studio");
-  }}
->
-  View Studio
-</button>
+    <button
+      style={primaryDarkButton}
+      onClick={() => {
+  setSelectedStudio({
+    name: studio.business_name,
+    type: `${studio.city} • ${studio.postcode}`
+  });
+  setPage("studio");
+}}
+    >
+      View Studio
+    </button>
 
-          </div>
+  </div>
 
-        </div>
+))}
+
+</div>
+
       </main>
     </div>
   );
