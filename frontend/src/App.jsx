@@ -94,16 +94,16 @@ useEffect(() => {
       requested: b.date
     }));
 
-    setOwnerData({
-      fullName: localStorage.getItem("pixelly_full_name") || "Studio Owner",
-      notifications: formatted,
-      trialDaysRemaining: 14
+          setOwnerData({
+        fullName: localStorage.getItem("pixelly_full_name") || "Studio Owner",
+        notifications: formatted,
+        trialDaysRemaining: 14
+      });
     });
-
   });
+}, []);
 
-    }
-  }, []);
+
 
   const onSignupChange = (e) => {
     setSignupForm({ ...signupForm, [e.target.name]: e.target.value });
