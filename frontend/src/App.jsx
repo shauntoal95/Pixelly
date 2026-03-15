@@ -47,18 +47,15 @@ const [bookingMessage, setBookingMessage] = useState("");
 
 /* EXISTING OWNER LOGIN CHECK */
 useEffect(() => {
-
   const role = localStorage.getItem("pixelly_role");
 
   if (role === "business_owner") {
-
     setPage("owner");
 
     const loadBookings = () => {
       fetch(`${API_URL}/api/bookings`)
         .then(res => res.json())
         .then(data => {
-
           const formatted = data.map(b => ({
             id: b.id,
             client: b.name,
@@ -72,7 +69,6 @@ useEffect(() => {
             notifications: formatted,
             trialDaysRemaining: 14
           });
-
         });
     };
 
@@ -81,10 +77,9 @@ useEffect(() => {
     const interval = setInterval(loadBookings, 5000);
 
     return () => clearInterval(interval);
-
   }
-
 }, []);
+
 
 
 
