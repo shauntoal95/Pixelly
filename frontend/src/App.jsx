@@ -28,8 +28,10 @@ const [bookingMessage, setBookingMessage] = useState("");
   email: "",
   password: "",
   city: "",
-  postcode: ""
+  postcode: "",
+  serviceRadius: ""
 });
+
 
   const [loginForm, setLoginForm] = useState({
     email: "",
@@ -289,6 +291,15 @@ const [bookingMessage, setBookingMessage] = useState("");
                 onChange={onSignupChange}
                 style={wideInput}
             />
+
+                <input
+                name="serviceRadius"
+                placeholder="Service radius (miles)"
+                value={signupForm.serviceRadius}
+                onChange={onSignupChange}
+                style={wideInput}
+              />
+
               <button type="submit" style={fullButton}>Start free trial</button>
             </form>
 
